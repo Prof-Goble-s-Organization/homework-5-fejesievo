@@ -101,16 +101,63 @@ public class COMP232LinkedBinarySearchTree<K extends Comparable<K>, V> extends C
 	 */
 	public V get(K key) {
 		// Intentionally not implemented - see homework assignment.
-		throw new UnsupportedOperationException("Not yet implemented");
+		return getNode(root, key);
+	}
+
+	private V getNode(BTNode<K,V> subTreeRoot, K key) {
+		if (subTreeRoot == null){
+			return null;
+		} else if (subTreeRoot.key.equals(key)){
+			return subTreeRoot.value;
+		} else if (key.compareTo(subTreeRoot.key) < 0) {
+			return getNode(subTreeRoot.left, key);
+		} else {
+			return getNode(subTreeRoot.right, key);
+		}
 	}
 
 	/**
 	 * {@inheritDoc}
+	 * @return 
+	 * @return 
 	 */
 	public void set(K key, V value) {
-		// Intentionally not implemented - see homework assignment.
-		throw new UnsupportedOperationException("Not yet implemented");
+		BTNode<K, V> current = root;
+	    BTNode<K, V> parent = null;
+
+	    while (current != null) {
+	        int cmp = key.compareTo(current.key);
+	        if (cmp == 0) {
+	            V oldValue = current.value;
+	            current.value = value;
+	            return; 
+	        }
+	        parent = current;
+	        if (cmp < 0) {
+	            current = current.left;
+	        } else {
+	            current = current.right;
+	        }
+	    }
+
+	    BTNode<K, V> newNode = new BTNode<>(key, value);
+	    if (parent == null) {
+	        
+	        root = newNode;
+	    } else if (key.compareTo(parent.key) < 0) {
+	        parent.left = newNode;
+	    } else {
+	        parent.right = newNode;
+	    }
+	    newNode.parent = parent;
+	    size++; 
+
+	    return; 
 	}
+	
+	
+	
+
 
 	/**
 	 * {@inheritDoc}
@@ -170,10 +217,73 @@ public class COMP232LinkedBinarySearchTree<K extends Comparable<K>, V> extends C
 	 * {@inheritDoc}
 	 */
 	public V remove(K key) {
-		// Intentionally not implemented - see homework assignment.
-		throw new UnsupportedOperationException("Not yet implemented");
+	    BTNode<K, V> current = root;
+	    BTNode<K, V> parent = null;
+
+	    // to find node to remove
+	    while (current != null) {
+	        int cmp = key.compareTo(current.key);
+	        if (cmp == 0) {
+	            
+	            V oldValue = current.value;
+
+	            // for no children
+	            if (current.left == null && current.right == null) {
+	                if (parent == null) {
+	                    root = null;
+	                } else if (parent.left == current) {
+	                    parent.left = null; 
+	                } else {
+	                    parent.right = null; 
+	                }
+	            }
+	            //  for 1 child
+	            else if (current.left == null || current.right == null) {
+	                BTNode<K, V> child = (current.left != null) ? current.left : current.right;
+
+	                if (parent == null) {
+	                    root = child; 
+	                } else if (parent.left == current) {
+	                    parent.left = child; 
+	                } else {
+	                    parent.right = child; 
+	                }
+	            }
+	            // for 2 children
+	            else {
+	                
+	                BTNode<K, V> successor = getMinNode(current.right);
+	               
+	                current.key = successor.key;
+	                current.value = successor.value;
+
+	               
+	                remove(successor.key);
+	            }
+
+	            size--; 
+	            return oldValue; 
+	        } else {
+	            parent = current;
+	            current = (cmp < 0) ? current.left : current.right;
+	        }
+	    }
+	    
+	    return null; 
 	}
 
+	/**
+	 * Helper method to find the node with the smallest key in the subtree.
+	 */
+	private BTNode<K, V> getMinNode(BTNode<K, V> subTreeRoot) {
+	    if (subTreeRoot == null) {
+	        return null;
+	    }
+	    while (subTreeRoot.left != null) {
+	        subTreeRoot = subTreeRoot.left; 
+	    }
+	    return subTreeRoot; 
+	}
 	/*
 	 * Helper method that verifies the BST property of this tree by traversing
 	 * the tree and verifying that at each node the key of the left child is <
@@ -215,3 +325,4 @@ public class COMP232LinkedBinarySearchTree<K extends Comparable<K>, V> extends C
 		}
 	}
 }
+
